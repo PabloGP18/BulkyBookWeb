@@ -37,15 +37,22 @@ namespace BulkyBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category obj)
         {
-            // this is a command to add something to the DB
-            _db.Categories.Add(obj);
-            // adding saveChanges it wil go to the DB and save the changes
-            _db.SaveChanges();
+            // Check validations serverside => modalstate.isvalid
+            if (ModelState.IsValid)
+            {
+                // this is a command to add something to the DB
+                _db.Categories.Add(obj);
+                // adding saveChanges it wil go to the DB and save the changes
+                _db.SaveChanges();
 
-            // with redirectaction you can go back to the index instead of staying on the page
-            // This will look for the index action inside the same controller
-            // if you had to redirect to another controller, you can just do it like this example index HomeController ("index","HomeController")
-            return RedirectToAction("Index");
+                // with redirectaction you can go back to the index instead of staying on the page
+                // This will look for the index action inside the same controller
+                // if you had to redirect to another controller, you can just do it like this example index HomeController ("index","HomeController")
+                return RedirectToAction("Index");
+            }
+            // if you don't fill in nothing in create category, it will return the view.
+            return View(obj);
+
         }
     }
 }
