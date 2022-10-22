@@ -17,6 +17,8 @@ namespace BulkyBookWeb.Controllers
             _db = db;
         }
 
+
+        // READ
         public IActionResult Index()
         {
             // calling DB information table categories
@@ -24,9 +26,15 @@ namespace BulkyBookWeb.Controllers
             return View(objCategoryList);
         }
 
+
+
+
+
+        // POST
+
         //GET
         public IActionResult Create()
-        {  
+        {
             return View();
         }
 
@@ -52,7 +60,7 @@ namespace BulkyBookWeb.Controllers
                 _db.Categories.Add(obj);
                 // adding saveChanges it wil go to the DB and save the changes
                 _db.SaveChanges();
-
+                TempData["success"] = "Category created successfully";
                 // with redirectaction you can go back to the index instead of staying on the page
                 // This will look for the index action inside the same controller
                 // if you had to redirect to another controller, you can just do it like this example index HomeController ("index","HomeController")
@@ -61,6 +69,14 @@ namespace BulkyBookWeb.Controllers
             // if you don't fill in nothing in create category, it will return the view.
             return View(obj);
 
+
+
+
+
+
+
+
+            // UPDATE
         }
         //GET
         // Edit will display the existing functionality of the category that was selected.
@@ -68,7 +84,7 @@ namespace BulkyBookWeb.Controllers
         public IActionResult Edit(int? id)
         {
             // Id has to exist or can not be 0
-            if(id == null || id == 0)
+            if (id == null || id == 0)
             {
                 return NotFound();
             }
@@ -107,10 +123,12 @@ namespace BulkyBookWeb.Controllers
 
             if (ModelState.IsValid)
             {
-
-                _db.Categories.Add(obj);
+                // Based on the primary key the update wil automaticly update all of the properties
+                _db.Categories.Update(obj);
 
                 _db.SaveChanges();
+                TempData["success"] = "Category updated successfully";
+
 
                 return RedirectToAction("Index");
             }
@@ -118,5 +136,59 @@ namespace BulkyBookWeb.Controllers
             return View(obj);
 
         }
-    }
+
+
+
+
+        // DELETE 
+
+
+        // Get
+
+        public IActionResult Delete(int? id)
+        {
+
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var categoryFromDB = _db.Categories.Find(id);
+
+            if (categoryFromDB == null)
+            {
+                return NotFound();
+            }
+
+            return View(categoryFromDB);
+        }
+
+
+
+
+        // Post
+        // With the action name you can give DeletePost another name for in the delete view
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePost(int? id)
+        {
+            var obj = _db.Categories.Find(id);
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+            _db.Categories.Remove(obj);
+
+            _db.SaveChanges();
+            TempData["success"] = "Category deleted successfully";
+
+
+            return RedirectToAction("Index");
+        }
+
+    } 
 }
+
+    
+
