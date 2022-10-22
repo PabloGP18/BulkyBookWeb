@@ -1,0 +1,10 @@
+﻿
+<!-- This is how you use tempdata, When it is not null, it will show the message given in the controller with the key (succes in this case) -->
+@if (TempData["success"] != null)
+{
+    <h1>@TempData["Success"]</h1>
+}
+@if(TempData["Error"] != null)
+{
+    <h2>@TempData["Error"]</h2>
+}
