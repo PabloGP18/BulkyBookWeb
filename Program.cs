@@ -15,7 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 
 // AddRazorRuntimeCompilation(); you need to add if you are not working with .net6, because of Hot reload it's not required anymore!
-//builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+// builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
 var app = builder.Build();
 
