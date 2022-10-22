@@ -62,5 +62,61 @@ namespace BulkyBookWeb.Controllers
             return View(obj);
 
         }
+        //GET
+        // Edit will display the existing functionality of the category that was selected.
+        // Here we will retrieve an intiger that will be id
+        public IActionResult Edit(int? id)
+        {
+            // Id has to exist or can not be 0
+            if(id == null || id == 0)
+            {
+                return NotFound();
+            }
+            // Here we extract the id from de db with the find method. This way it tries to find the primary key based on the primary key of the table and assigned that to the variable categoryFromDB.
+            var categoryFromDB = _db.Categories.Find(id);
+
+            // 2 other ways to retrieve an ID from category
+
+            // Here it will find the Id and it will return the first one it finds with the id you arsking for.
+            // var categoryFromDBFirst = _db.Categories.FirstOrDefault(u=>u.Id==id);
+            // it returns only one element but without throwing an exeption
+            // var categoryFromDBSingle = _db.Categories.SingleOrDefault(u=>u.Id==id);
+
+            // If it doesn't find a category it will display not found
+            if (categoryFromDB == null)
+            {
+                return NotFound();
+            }
+            // If it founds the category it will return it to the view
+            return View(categoryFromDB);
+        }
+
+
+        //POST
+        [HttpPost]
+
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Category obj)
+        {
+
+            if (obj.Name == obj.DisplayOrder.ToString())
+            {
+
+                ModelState.AddModelError("CustomError", "The DisplayOrder cannot exactly match the Name.");
+            }
+
+            if (ModelState.IsValid)
+            {
+
+                _db.Categories.Add(obj);
+
+                _db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            return View(obj);
+
+        }
     }
 }
