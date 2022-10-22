@@ -181,7 +181,7 @@ namespace BulkyBookWeb.Controllers
             _db.Categories.Remove(obj);
 
             _db.SaveChanges();
-            // Tempdata is a temporary message that will be in the view untill you refresh the page => look @ the view of index how to implement them!
+            // Tempdata is a temporary message that will be in the view untill you refresh the page => look @ the _layout file (partial) how to implement them!
             TempData["success"] = "Category deleted successfully";
 
 
