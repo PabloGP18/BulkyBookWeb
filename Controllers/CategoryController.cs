@@ -37,6 +37,14 @@ namespace BulkyBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category obj)
         {
+            // custom validation => we want to make sure we do not add any category wich has the same name and display order
+            // you need summary validation to display this without giving a key name of the form
+            if (obj.Name == obj.DisplayOrder.ToString())
+            {
+                // adding a custom error
+                // If you want to add the orrer to the form and not to the summary validation => change key CustomError to Name or display order to display validation in form
+                ModelState.AddModelError("CustomError", "The DisplayOrder cannot exactly match the Name.");
+            }
             // Check validations serverside => modalstate.isvalid
             if (ModelState.IsValid)
             {
