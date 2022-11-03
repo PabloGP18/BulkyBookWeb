@@ -1,20 +1,20 @@
-﻿using BulkyBookWeb.Data;
-using BulkyBookWeb.Models;
+﻿using BulkyBook.DataAccess;
+using BulkyBook.DataAccess.Repository.IRepository;
+using BulkyBook.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 
-namespace BulkyBookWeb.Controllers
+namespace BulkyBookWeb.Areas.Admin.Controllers
 {
-    public class CategoryController : Controller
+    public class CoverTypeController : Controller
     {
         // making the connection true the dependency injection in the controller 
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
 
         // making the constructor for the connection true the dependency injection in the controller
 
-        public CategoryController(ApplicationDbContext db)
+        public CoverTypeController(IUnitOfWork unitOfWork)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
         }
 
 
@@ -22,8 +22,8 @@ namespace BulkyBookWeb.Controllers
         public IActionResult Index()
         {
             // calling DB information table categories
-            IEnumerable<Category> objCategoryList = _db.Categories;
-            return View(objCategoryList);
+            IEnumerable<CoverType> objCoverTypeList = _unitOfWork.CoverType.GetAll();
+            return View(objCoverTypeList);
         }
 
 
@@ -43,30 +43,23 @@ namespace BulkyBookWeb.Controllers
         [HttpPost]
         // This is needed so that they can't hack the website true the form
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Category obj)
+        public IActionResult Create(CoverType obj)
         {
-            // custom validation => we want to make sure we do not add any category wich has the same name and display order
-            // you need summary validation to display this without giving a key name of the form
-            if (obj.Name == obj.DisplayOrder.ToString())
-            {
-                // adding a custom error
-                // If you want to add the orrer to the form and not to the summary validation => change key CustomError to Name or display order to display validation in form
-                ModelState.AddModelError("CustomError", "The DisplayOrder cannot exactly match the Name.");
-            }
+
             // Check validations serverside => modalstate.isvalid
             if (ModelState.IsValid)
             {
                 // this is a command to add something to the DB
-                _db.Categories.Add(obj);
+                _unitOfWork.CoverType.Add(obj);
                 // adding saveChanges it wil go to the DB and save the changes
-                _db.SaveChanges();
-                TempData["success"] = "Category created successfully";
+                _unitOfWork.Save();
+                TempData["success"] = "CoverType created successfully";
                 // with redirectaction you can go back to the index instead of staying on the page
                 // This will look for the index action inside the same controller
                 // if you had to redirect to another controller, you can just do it like this example index HomeController ("index","HomeController")
                 return RedirectToAction("Index");
             }
-            // if you don't fill in nothing in create category, it will return the view.
+            // if you don't fill in nothing in create CoverType, it will return the view.
             return View(obj);
 
 
@@ -79,7 +72,7 @@ namespace BulkyBookWeb.Controllers
             // UPDATE
         }
         //GET
-        // Edit will display the existing functionality of the category that was selected.
+        // Edit will display the existing functionality of the CoverType that was selected.
         // Here we will retrieve an intiger that will be id
         public IActionResult Edit(int? id)
         {
@@ -88,23 +81,23 @@ namespace BulkyBookWeb.Controllers
             {
                 return NotFound();
             }
-            // Here we extract the id from de db with the find method. This way it tries to find the primary key based on the primary key of the table and assigned that to the variable categoryFromDB.
-            var categoryFromDB = _db.Categories.Find(id);
+            // Here we extract the id from de db with the find method. This way it tries to find the primary key based on the primary key of the table and assigned that to the variable CoverTypeFromDB.
+            //var CoverType = _db.Categories.Find(id);
 
-            // 2 other ways to retrieve an ID from category
+            // 2 other ways to retrieve an ID from CoverType
 
             // Here it will find the Id and it will return the first one it finds with the id you arsking for.
-            // var categoryFromDBFirst = _db.Categories.FirstOrDefault(u=>u.Id==id);
+            var CoverTypeFromDBFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
             // it returns only one element but without throwing an exeption
-            // var categoryFromDBSingle = _db.Categories.SingleOrDefault(u=>u.Id==id);
+            // var CoverTypeFromDBSingle = _db.Categories.SingleOrDefault(u=>u.Id==id);
 
-            // If it doesn't find a category it will display not found
-            if (categoryFromDB == null)
+            // If it doesn't find a CoverType it will display not found
+            if (CoverTypeFromDBFirst == null)
             {
                 return NotFound();
             }
-            // If it founds the category it will return it to the view
-            return View(categoryFromDB);
+            // If it founds the CoverType it will return it to the view
+            return View(CoverTypeFromDBFirst);
         }
 
 
@@ -112,22 +105,18 @@ namespace BulkyBookWeb.Controllers
         [HttpPost]
 
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Category obj)
+        public IActionResult Edit(CoverType obj)
         {
 
-            if (obj.Name == obj.DisplayOrder.ToString())
-            {
-
-                ModelState.AddModelError("CustomError", "The DisplayOrder cannot exactly match the Name.");
-            }
+          
 
             if (ModelState.IsValid)
             {
                 // Based on the primary key the update wil automaticly update all of the properties
-                _db.Categories.Update(obj);
+                _unitOfWork.CoverType.Update(obj);
 
-                _db.SaveChanges();
-                TempData["success"] = "Category updated successfully";
+                _unitOfWork.Save();
+                TempData["success"] = "CoverType updated successfully";
 
 
                 return RedirectToAction("Index");
@@ -153,14 +142,14 @@ namespace BulkyBookWeb.Controllers
                 return NotFound();
             }
 
-            var categoryFromDB = _db.Categories.Find(id);
-
-            if (categoryFromDB == null)
+            // var CoverTypeFromDB = _db.Categories.Find(id);
+            var CoverTypeFromDBFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
+            if (CoverTypeFromDBFirst == null)
             {
                 return NotFound();
             }
 
-            return View(categoryFromDB);
+            return View(CoverTypeFromDBFirst);
         }
 
 
@@ -172,24 +161,24 @@ namespace BulkyBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
-            var obj = _db.Categories.Find(id);
+            var obj = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
 
             if (obj == null)
             {
                 return NotFound();
             }
-            _db.Categories.Remove(obj);
+            _unitOfWork.CoverType.Remove(obj);
 
-            _db.SaveChanges();
+            _unitOfWork.Save();
             // Tempdata is a temporary message that will be in the view untill you refresh the page => look @ the _layout file (partial) how to implement them!
-            TempData["success"] = "Category deleted successfully";
+            TempData["success"] = "CoverType deleted successfully";
 
 
             return RedirectToAction("Index");
         }
 
-    } 
+    }
 }
 
-    
+
 
